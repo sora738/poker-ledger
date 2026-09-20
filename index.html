@@ -164,13 +164,13 @@
     background:var(--surface);
     border:1px solid var(--line);
     border-radius:10px;
-    padding:16px;
-    display:flex;flex-direction:column;gap:12px;
+    padding:12px;
+    display:flex;flex-direction:column;gap:9px;
     min-width:0;
   }
 
-  .field{display:flex;flex-direction:column;gap:5px;min-width:0;}
-  .field label{font-size:12px;color:var(--ink-soft);font-weight:500;}
+  .field{display:flex;flex-direction:column;gap:3px;min-width:0;}
+  .field label{font-size:11px;color:var(--ink-soft);font-weight:500;}
   .field input[type=date],
   .field input[type=text],
   .field input[type=number],
@@ -178,30 +178,32 @@
     background:var(--surface-2);
     border:1px solid var(--line);
     border-radius:7px;
-    padding:10px 11px;
+    padding:8px 10px;
     font-size:15px;
     color:var(--ink);
     width:100%;
     max-width:100%;
     min-width:0;
     box-sizing:border-box;
+    overflow:hidden;
   }
   .field input[type=date]{-webkit-min-logical-width:0;}
+  .field input[type=date]::-webkit-calendar-picker-indicator{margin-inline-start:4px;padding:0;}
   .field input:focus-visible,.field select:focus-visible{outline:2px solid var(--focus);outline-offset:1px;}
-  .grid-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;}
+  .grid-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;}
   .grid-2 > .field{min-width:0;}
 
   .add-row{display:flex;gap:6px;margin-top:2px;}
   .add-row input{flex:1;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:7px;padding:9px 10px;font-size:14px;color:var(--ink);}
 
   .toggle-row{
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
     background:var(--surface-2);border:1px solid var(--line);border-radius:7px;
-    padding:10px 12px;
+    padding:8px 12px;
   }
-  .toggle-row .toggle-text{display:flex;flex-direction:column;gap:2px;}
-  .toggle-row .toggle-text span.t{font-size:13.5px;font-weight:500;}
-  .toggle-row .toggle-text span.c{font-size:11px;color:var(--ink-faint);}
+  .toggle-row .toggle-text{display:flex;flex-direction:column;gap:1px;min-width:0;}
+  .toggle-row .toggle-text span.t{font-size:13px;font-weight:500;}
+  .toggle-row .toggle-text span.c{font-size:10px;color:var(--ink-faint);}
   .switch{position:relative;width:40px;height:23px;flex:none;}
   .switch input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer;}
   .switch .track{position:absolute;inset:0;background:var(--line-strong);border-radius:20px;transition:background .15s;}
@@ -209,10 +211,10 @@
   .switch input:checked + .track{background:var(--accent);}
   .switch input:checked + .track + .knob{transform:translateX(17px);}
 
-  .reveal-fields{display:flex;flex-direction:column;gap:10px;padding-top:2px;}
+  .reveal-fields{display:flex;flex-direction:column;gap:8px;}
 
   .btn{
-    border:none;border-radius:8px;padding:12px 16px;font-size:14.5px;font-weight:700;
+    border:none;border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:700;
     cursor:pointer;letter-spacing:.02em;
   }
   .btn-primary{background:var(--accent);color:var(--accent-ink);}
@@ -418,7 +420,7 @@
           <div class="toggle-row">
             <div class="toggle-text">
               <span class="t">ドリンクチケット</span>
-              <span class="c">有りの場合 +¥1,000（パターン3のみバイインに算入）</span>
+              <span class="c">有りで+¥1,000（パターン3のみ算入）</span>
             </div>
             <label class="switch">
               <input type="checkbox" id="dom-drink">
@@ -429,7 +431,7 @@
           <div class="toggle-row">
             <div class="toggle-text">
               <span class="t">上位入賞を記録</span>
-              <span class="c">総エントリー数と順位を残す</span>
+              <span class="c">エントリー数・順位を記録</span>
             </div>
             <label class="switch">
               <input type="checkbox" id="dom-placed">
@@ -503,7 +505,7 @@
           <div class="toggle-row">
             <div class="toggle-text">
               <span class="t">上位入賞を記録</span>
-              <span class="c">総エントリー数と順位を残す</span>
+              <span class="c">エントリー数・順位を記録</span>
             </div>
             <label class="switch">
               <input type="checkbox" id="ovs-placed">
@@ -622,7 +624,7 @@
 
   var records = loadJSON(KEYS.records, []);
   var customOptions = loadJSON(KEYS.options, {});
-  var pattern = parseInt(safeGet(KEYS.pattern) || '1', 10);
+  var pattern = parseInt(safeGet(KEYS.pattern) || '2', 10);
   var historyCat = safeGet(KEYS.hcat) || 'domestic';
 
   function saveRecords(){ safeSet(KEYS.records, JSON.stringify(records)); }
@@ -1160,7 +1162,7 @@
     renderTopResults();
   }
 
-  setPattern(isNaN(pattern)||pattern<1||pattern>3 ? 1 : pattern);
+  setPattern(isNaN(pattern)||pattern<1||pattern>3 ? 2 : pattern);
   document.querySelectorAll('.category-switch .seg-btn').forEach(function(b){
     b.setAttribute('aria-pressed', String(b.dataset.hcat===historyCat));
   });
