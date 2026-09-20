@@ -70,7 +70,7 @@
   }
 
   *{box-sizing:border-box;}
-  html,body{height:100%;overscroll-behavior:none;}
+  html,body{height:100%;height:100dvh;overscroll-behavior:none;}
   body{
     background:var(--bg);
     color:var(--ink);
@@ -84,6 +84,7 @@
 
   .app{
     height:100%;
+    height:100dvh;
     display:flex;
     flex-direction:column;
     max-width:560px;
@@ -95,21 +96,14 @@
   .topbar{
     flex:none;
     display:flex;
-    align-items:baseline;
+    align-items:center;
     justify-content:space-between;
-    padding:10px 16px 9px;
+    padding:8px 16px;
     border-bottom:1px solid var(--line);
     background:var(--surface);
   }
   .brand{display:flex;flex-direction:column;gap:2px;}
-  .brand h1{font-size:21px;font-weight:800;letter-spacing:.02em;}
-  .brand .masthead{
-    font-family:'Space Mono',monospace;
-    font-size:9px;
-    letter-spacing:.18em;
-    color:var(--ink-faint);
-    text-transform:uppercase;
-  }
+  .brand h1{font-size:17px;font-weight:800;letter-spacing:.02em;}
   .topbar .today{
     font-family:'Space Mono',monospace;
     font-size:11px;
@@ -124,8 +118,8 @@
     overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
     overscroll-behavior:contain;
-    padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));
-    display:flex;flex-direction:column;gap:12px;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));
+    display:flex;flex-direction:column;gap:10px;
     min-width:0;
   }
   .page[hidden]{display:none;}
@@ -140,7 +134,7 @@
   }
 
   /* ---- record list / navigation ---- */
-  #record-list-view,.form-view{display:flex;flex-direction:column;gap:11px;min-width:0;}
+  #record-list-view,.form-view{display:flex;flex-direction:column;gap:9px;min-width:0;}
   .record-row{
     background:var(--surface);
     border:1px solid var(--line);
@@ -148,7 +142,7 @@
     overflow:hidden;
     width:100%;
     cursor:pointer;
-    padding:11px 14px;
+    padding:9px 14px;
     display:flex;align-items:center;justify-content:space-between;gap:10px;
     text-align:left;
     -webkit-appearance:none;appearance:none;
@@ -226,18 +220,18 @@
   .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line-strong);}
 
   /* ---- ledger / stats ---- */
-  .ledger-head{display:flex;flex-direction:column;gap:6px;}
+  .ledger-head{display:flex;flex-direction:column;gap:5px;}
   .ledger-head h2{font-size:16px;}
   .pattern-switch{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:3px;gap:3px;}
-  .seg-btn{flex:1;border:none;background:transparent;border-radius:6px;padding:7px 4px;font-size:12.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;}
+  .seg-btn{flex:1;border:none;background:transparent;border-radius:6px;padding:6px 4px;font-size:12.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;}
   .seg-btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);}
   .pattern-caption{font-size:11px;color:var(--ink-faint);padding:0 2px;line-height:1.4;}
 
   .stat-table-wrap{overflow-x:auto;}
   .stat-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:10px;table-layout:fixed;}
-  .stat-table th,.stat-table td{padding:6px 5px;}
+  .stat-table th,.stat-table td{padding:5px 5px;}
   .stat-table thead th{
-    text-align:right;padding-top:9px;padding-bottom:7px;border-bottom:1px solid var(--line-strong);
+    text-align:right;padding-top:7px;padding-bottom:5px;border-bottom:1px solid var(--line-strong);
     font-weight:400;
   }
   .stat-table thead th:first-child{width:26%;}
@@ -324,7 +318,6 @@
   <header class="topbar">
     <div class="brand">
       <h1>ポーカー収支帳</h1>
-      <div class="masthead">Personal Results Ledger</div>
     </div>
     <div class="today num" id="today-label"></div>
   </header>
@@ -946,9 +939,9 @@
 
   /* ---------- pattern switch ---------- */
   var PATTERN_CAPTIONS = {
-    1: '国内トナメのエントリー費から消費税10%を除いた額をバイインとして集計（ドリンクチケット代は含みません）',
-    2: '国内トナメのエントリー費を入力どおりに集計（ドリンクチケット代は含みません）',
-    3: '国内トナメのエントリー費にドリンクチケット代（有りの場合+¥1,000）を加えて集計'
+    1: '国内は消費税10%抜きで集計（チケット代は含まない）',
+    2: '国内は入力額そのままで集計（チケット代は含まない）',
+    3: '国内はチケット代込みで集計'
   };
   function setPattern(p){
     pattern = p; savePattern();
