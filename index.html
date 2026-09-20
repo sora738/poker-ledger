@@ -130,31 +130,37 @@
     margin:2px 2px 0;
   }
 
-  /* ---- entry accordion cards ---- */
-  .entry-card{
+  /* ---- record list / navigation ---- */
+  #record-list-view,.form-view{display:flex;flex-direction:column;gap:16px;}
+  .record-row{
     background:var(--surface);
     border:1px solid var(--line);
     border-radius:10px;
     overflow:hidden;
-  }
-  .entry-card summary{
-    list-style:none;
+    width:100%;
     cursor:pointer;
     padding:14px 16px;
     display:flex;align-items:center;justify-content:space-between;gap:10px;
+    text-align:left;
+    -webkit-appearance:none;appearance:none;
   }
-  .entry-card summary::-webkit-details-marker{display:none;}
-  .entry-card summary:focus-visible{outline:2px solid var(--focus);outline-offset:-2px;}
+  .record-row:active{background:var(--surface-2);}
+  .record-row:focus-visible{outline:2px solid var(--focus);outline-offset:-2px;}
   .summary-main{display:flex;flex-direction:column;gap:3px;min-width:0;}
   .summary-title{font-weight:700;font-size:15px;}
   .summary-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--ink-faint);letter-spacing:.1em;text-transform:uppercase;}
   .summary-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-soft);flex:none;}
-  .chev{flex:none;font-size:20px;color:var(--ink-faint);transition:transform .18s ease;transform:rotate(0deg);}
-  details[open] .chev{transform:rotate(90deg);}
-  .entry-card form{
-    padding:2px 16px 16px;
-    border-top:1px solid var(--line);
-    padding-top:14px;
+  .chev{flex:none;font-size:20px;color:var(--ink-faint);}
+
+  .sub-header{display:flex;align-items:center;gap:10px;}
+  .back-btn{background:none;border:none;color:var(--accent-strong);font-size:15px;font-weight:700;padding:4px 2px;cursor:pointer;}
+  .sub-title{font-family:'Shippori Mincho','Hiragino Mincho ProN','Yu Mincho',serif;font-size:18px;font-weight:700;}
+
+  .form-view form{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:16px;
     display:flex;flex-direction:column;gap:12px;
   }
 
@@ -310,18 +316,56 @@
     <!-- ============ PAGE 1: 記録 ============ -->
     <section class="page" id="page-record">
 
-      <div class="section-label">記録を追加</div>
+      <div id="record-list-view">
+        <div class="section-label">記録を追加</div>
 
-      <!-- 国内トナメ -->
-      <details class="entry-card" id="card-domestic">
-        <summary>
+        <button type="button" class="record-row" data-open="domestic">
           <div class="summary-main">
             <div class="summary-title">国内トナメ</div>
             <div class="summary-sub">Domestic Tournament</div>
           </div>
           <div class="summary-count num" id="count-domestic">0件</div>
           <div class="chev">›</div>
-        </summary>
+        </button>
+
+        <button type="button" class="record-row" data-open="overseas">
+          <div class="summary-main">
+            <div class="summary-title">海外トナメ</div>
+            <div class="summary-sub">Overseas Tournament</div>
+          </div>
+          <div class="summary-count num" id="count-overseas">0件</div>
+          <div class="chev">›</div>
+        </button>
+
+        <button type="button" class="record-row" data-open="cash">
+          <div class="summary-main">
+            <div class="summary-title">キャッシュゲーム</div>
+            <div class="summary-sub">Cash Game</div>
+          </div>
+          <div class="summary-count num" id="count-cash">0件</div>
+          <div class="chev">›</div>
+        </button>
+
+        <div class="ledger-head">
+          <div class="section-label">収支サマリー</div>
+          <h2>Summary</h2>
+          <div class="pattern-switch" role="group" aria-label="集計パターン">
+            <button type="button" class="seg-btn" data-pattern="1">税抜</button>
+            <button type="button" class="seg-btn" data-pattern="2">チケット抜き</button>
+            <button type="button" class="seg-btn" data-pattern="3">チケット込み</button>
+          </div>
+          <div class="pattern-caption" id="pattern-caption"></div>
+        </div>
+
+        <div class="stat-table-wrap"><table class="stat-table" id="stat-table"></table></div>
+      </div>
+
+      <!-- 国内トナメ 入力ページ -->
+      <div class="form-view" id="form-view-domestic" hidden>
+        <div class="sub-header">
+          <button type="button" class="back-btn" data-back>‹ 戻る</button>
+          <div class="sub-title">国内トナメ</div>
+        </div>
         <form id="form-domestic" novalidate>
           <div class="form-error" id="dom-form-error" hidden>入力に不備があります。赤枠の項目をご確認ください</div>
           <div class="field">
@@ -399,18 +443,14 @@
           </div>
           <button type="submit" class="btn btn-primary">国内トナメを記録する</button>
         </form>
-      </details>
+      </div>
 
-      <!-- 海外トナメ -->
-      <details class="entry-card" id="card-overseas">
-        <summary>
-          <div class="summary-main">
-            <div class="summary-title">海外トナメ</div>
-            <div class="summary-sub">Overseas Tournament</div>
-          </div>
-          <div class="summary-count num" id="count-overseas">0件</div>
-          <div class="chev">›</div>
-        </summary>
+      <!-- 海外トナメ 入力ページ -->
+      <div class="form-view" id="form-view-overseas" hidden>
+        <div class="sub-header">
+          <button type="button" class="back-btn" data-back>‹ 戻る</button>
+          <div class="sub-title">海外トナメ</div>
+        </div>
         <form id="form-overseas" novalidate>
           <div class="form-error" id="ovs-form-error" hidden>入力に不備があります。赤枠の項目をご確認ください</div>
           <div class="field">
@@ -477,18 +517,14 @@
           </div>
           <button type="submit" class="btn btn-primary">海外トナメを記録する</button>
         </form>
-      </details>
+      </div>
 
-      <!-- キャッシュゲーム -->
-      <details class="entry-card" id="card-cash">
-        <summary>
-          <div class="summary-main">
-            <div class="summary-title">キャッシュゲーム</div>
-            <div class="summary-sub">Cash Game</div>
-          </div>
-          <div class="summary-count num" id="count-cash">0件</div>
-          <div class="chev">›</div>
-        </summary>
+      <!-- キャッシュゲーム 入力ページ -->
+      <div class="form-view" id="form-view-cash" hidden>
+        <div class="sub-header">
+          <button type="button" class="back-btn" data-back>‹ 戻る</button>
+          <div class="sub-title">キャッシュゲーム</div>
+        </div>
         <form id="form-cash" novalidate>
           <div class="form-error" id="cash-form-error" hidden>入力に不備があります。赤枠の項目をご確認ください</div>
           <div class="field">
@@ -516,20 +552,7 @@
           </div>
           <button type="submit" class="btn btn-primary">キャッシュを記録する</button>
         </form>
-      </details>
-
-      <div class="ledger-head">
-        <div class="section-label">収支サマリー</div>
-        <h2>Summary</h2>
-        <div class="pattern-switch" role="group" aria-label="集計パターン">
-          <button type="button" class="seg-btn" data-pattern="1">税抜</button>
-          <button type="button" class="seg-btn" data-pattern="2">チケット抜き</button>
-          <button type="button" class="seg-btn" data-pattern="3">チケット込み</button>
-        </div>
-        <div class="pattern-caption" id="pattern-caption"></div>
       </div>
-
-      <div class="stat-table-wrap"><table class="stat-table" id="stat-table"></table></div>
 
     </section>
 
@@ -936,12 +959,29 @@
     b.addEventListener('click', function(){ setHistoryCat(b.dataset.hcat); });
   });
 
+  /* ---------- record view navigation ---------- */
+  function showRecordView(view){
+    ['list','domestic','overseas','cash'].forEach(function(v){
+      var el = v==='list' ? document.getElementById('record-list-view') : document.getElementById('form-view-'+v);
+      el.hidden = (v!==view);
+    });
+    var page = document.getElementById('page-record');
+    page.scrollTop = 0;
+  }
+  document.querySelectorAll('.record-row').forEach(function(btn){
+    btn.addEventListener('click', function(){ showRecordView(btn.dataset.open); });
+  });
+  document.querySelectorAll('.back-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ showRecordView('list'); });
+  });
+
   /* ---------- tab bar ---------- */
   document.querySelectorAll('.tab-btn').forEach(function(b){
     b.addEventListener('click', function(){
       document.querySelectorAll('.tab-btn').forEach(function(x){ x.setAttribute('aria-current', String(x===b)); });
       document.getElementById('page-record').hidden = b.dataset.page!=='record';
       document.getElementById('page-history').hidden = b.dataset.page!=='history';
+      if(b.dataset.page==='record') showRecordView('list');
     });
   });
 
