@@ -622,15 +622,11 @@
   "use strict";
 
   function syncViewportHeight(){
-    var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
-    document.documentElement.style.setProperty('--app-vh', (h/100) + 'px');
+    document.documentElement.style.setProperty('--app-vh', (window.innerHeight/100) + 'px');
   }
   syncViewportHeight();
-  window.addEventListener('resize', syncViewportHeight);
   window.addEventListener('orientationchange', syncViewportHeight);
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize', syncViewportHeight);
-  }
+  window.addEventListener('pageshow', syncViewportHeight);
 
   var KEYS = { records:'pokerlog.records.v1', options:'pokerlog.options.v1', pattern:'pokerlog.pattern.v1', hcat:'pokerlog.hcat.v1' };
 
