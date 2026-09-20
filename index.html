@@ -184,20 +184,22 @@
   }
 
   .field{display:flex;flex-direction:column;gap:6px;min-width:0;}
-  .field label{font-size:12.5px;color:var(--ink-soft);font-weight:500;}
+  .field label{font-size:13.5px;color:var(--ink-soft);font-weight:600;}
   .field input[type=date],
   .field input[type=text],
   .field input[type=number],
   .field select{
     background:var(--surface-2);
-    border:1px solid var(--line);
+    border:1.5px solid var(--line-strong);
     border-radius:8px;
-    padding:13px 12px;
-    font-size:16px;
+    padding:15px 14px;
+    font-size:18px;
+    font-weight:500;
     color:var(--ink);
     width:100%;
     max-width:100%;
     min-width:0;
+    min-height:52px;
     box-sizing:border-box;
     overflow:hidden;
   }
@@ -213,7 +215,7 @@
   .grid-2 > .field{min-width:0;}
 
   .add-row{display:flex;gap:8px;margin-top:2px;}
-  .add-row input{flex:1;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;padding:12px;font-size:16px;color:var(--ink);}
+  .add-row input{flex:1;background:var(--surface-2);border:1.5px solid var(--line-strong);border-radius:8px;padding:14px;font-size:17px;font-weight:500;color:var(--ink);min-height:52px;box-sizing:border-box;}
 
   .toggle-row{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
