@@ -187,7 +187,12 @@
     box-sizing:border-box;
     overflow:hidden;
   }
-  .field input[type=date]{-webkit-min-logical-width:0;}
+  .field input[type=date]{
+    -webkit-appearance:none;
+    appearance:none;
+    -webkit-min-logical-width:0;
+    text-align:left;
+  }
   .field input[type=date]::-webkit-calendar-picker-indicator{margin-inline-start:4px;padding:0;}
   .field input:focus-visible,.field select:focus-visible{outline:2px solid var(--focus);outline-offset:1px;}
   .grid-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;}
@@ -361,8 +366,8 @@
           <h2>Summary</h2>
           <div class="pattern-switch" role="group" aria-label="集計パターン">
             <button type="button" class="seg-btn" data-pattern="1">税抜</button>
-            <button type="button" class="seg-btn" data-pattern="2">チケット抜き</button>
-            <button type="button" class="seg-btn" data-pattern="3">チケット込み</button>
+            <button type="button" class="seg-btn" data-pattern="2">ドリンク抜き</button>
+            <button type="button" class="seg-btn" data-pattern="3">ドリンク込み</button>
           </div>
           <div class="pattern-caption" id="pattern-caption"></div>
         </div>
@@ -941,9 +946,9 @@
 
   /* ---------- pattern switch ---------- */
   var PATTERN_CAPTIONS = {
-    1: '国内は消費税10%抜きで集計（チケット代は含まない）',
-    2: '国内は入力額そのままで集計（チケット代は含まない）',
-    3: '国内はチケット代込みで集計'
+    1: '国内は消費税10%抜きで集計（ドリンクチケット代は含まない）',
+    2: '国内は入力額そのままで集計（ドリンクチケット代は含まない）',
+    3: '国内はドリンクチケット代込みで集計'
   };
   function setPattern(p){
     pattern = p; savePattern();
