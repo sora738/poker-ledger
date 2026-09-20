@@ -97,7 +97,7 @@
     display:flex;
     align-items:baseline;
     justify-content:space-between;
-    padding:14px 18px 12px;
+    padding:10px 16px 9px;
     border-bottom:1px solid var(--line);
     background:var(--surface);
   }
@@ -117,14 +117,16 @@
     white-space:nowrap;
   }
 
-  .content{flex:1;min-height:0;position:relative;}
+  .content{flex:1;min-height:0;min-width:0;position:relative;}
   .page{
     position:absolute;inset:0;
     overflow-y:auto;
+    overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
     overscroll-behavior:contain;
-    padding:16px 16px calc(24px + env(safe-area-inset-bottom,0px));
-    display:flex;flex-direction:column;gap:16px;
+    padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));
+    display:flex;flex-direction:column;gap:12px;
+    min-width:0;
   }
   .page[hidden]{display:none;}
 
@@ -138,7 +140,7 @@
   }
 
   /* ---- record list / navigation ---- */
-  #record-list-view,.form-view{display:flex;flex-direction:column;gap:16px;}
+  #record-list-view,.form-view{display:flex;flex-direction:column;gap:11px;min-width:0;}
   .record-row{
     background:var(--surface);
     border:1px solid var(--line);
@@ -146,10 +148,11 @@
     overflow:hidden;
     width:100%;
     cursor:pointer;
-    padding:14px 16px;
+    padding:11px 14px;
     display:flex;align-items:center;justify-content:space-between;gap:10px;
     text-align:left;
     -webkit-appearance:none;appearance:none;
+    min-width:0;
   }
   .record-row:active{background:var(--surface-2);}
   .record-row:focus-visible{outline:2px solid var(--focus);outline-offset:-2px;}
@@ -169,9 +172,10 @@
     border-radius:10px;
     padding:16px;
     display:flex;flex-direction:column;gap:12px;
+    min-width:0;
   }
 
-  .field{display:flex;flex-direction:column;gap:5px;}
+  .field{display:flex;flex-direction:column;gap:5px;min-width:0;}
   .field label{font-size:12px;color:var(--ink-soft);font-weight:500;}
   .field input[type=date],
   .field input[type=text],
@@ -184,9 +188,14 @@
     font-size:15px;
     color:var(--ink);
     width:100%;
+    max-width:100%;
+    min-width:0;
+    box-sizing:border-box;
   }
+  .field input[type=date]{-webkit-min-logical-width:0;}
   .field input:focus-visible,.field select:focus-visible{outline:2px solid var(--focus);outline-offset:1px;}
-  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .grid-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;}
+  .grid-2 > .field{min-width:0;}
 
   .add-row{display:flex;gap:6px;margin-top:2px;}
   .add-row input{flex:1;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:7px;padding:9px 10px;font-size:14px;color:var(--ink);}
@@ -217,18 +226,18 @@
   .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line-strong);}
 
   /* ---- ledger / stats ---- */
-  .ledger-head{display:flex;flex-direction:column;gap:8px;}
-  .ledger-head h2{font-size:17px;}
+  .ledger-head{display:flex;flex-direction:column;gap:6px;}
+  .ledger-head h2{font-size:16px;}
   .pattern-switch{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:3px;gap:3px;}
-  .seg-btn{flex:1;border:none;background:transparent;border-radius:6px;padding:8px 4px;font-size:12.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;}
+  .seg-btn{flex:1;border:none;background:transparent;border-radius:6px;padding:7px 4px;font-size:12.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;}
   .seg-btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);}
-  .pattern-caption{font-size:11.5px;color:var(--ink-faint);padding:0 2px;line-height:1.5;}
+  .pattern-caption{font-size:11px;color:var(--ink-faint);padding:0 2px;line-height:1.4;}
 
   .stat-table-wrap{overflow-x:auto;}
   .stat-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:10px;table-layout:fixed;}
-  .stat-table th,.stat-table td{padding:8px 5px;}
+  .stat-table th,.stat-table td{padding:6px 5px;}
   .stat-table thead th{
-    text-align:right;padding-top:11px;padding-bottom:9px;border-bottom:1px solid var(--line-strong);
+    text-align:right;padding-top:9px;padding-bottom:7px;border-bottom:1px solid var(--line-strong);
     font-weight:400;
   }
   .stat-table thead th:first-child{width:26%;}
@@ -296,11 +305,11 @@
   /* ---- tab bar ---- */
   .tabbar{
     flex:none;display:flex;border-top:1px solid var(--line);background:var(--surface);
-    padding:6px 10px calc(6px + env(safe-area-inset-bottom,0px));
+    padding:4px 10px calc(4px + env(safe-area-inset-bottom,0px));
   }
   .tab-btn{
-    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
-    background:none;border:none;padding:6px 4px;color:var(--ink-faint);cursor:pointer;
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+    background:none;border:none;padding:5px 4px;color:var(--ink-faint);cursor:pointer;
   }
   .tab-btn svg{width:21px;height:21px;}
   .tab-btn span{font-size:10.5px;font-weight:700;letter-spacing:.02em;}
@@ -331,7 +340,6 @@
         <button type="button" class="record-row" data-open="domestic">
           <div class="summary-main">
             <div class="summary-title">国内トナメ</div>
-            <div class="summary-sub">Domestic Tournament</div>
           </div>
           <div class="summary-count num" id="count-domestic">0件</div>
           <div class="chev">›</div>
@@ -340,7 +348,6 @@
         <button type="button" class="record-row" data-open="overseas">
           <div class="summary-main">
             <div class="summary-title">海外トナメ</div>
-            <div class="summary-sub">Overseas Tournament</div>
           </div>
           <div class="summary-count num" id="count-overseas">0件</div>
           <div class="chev">›</div>
@@ -349,7 +356,6 @@
         <button type="button" class="record-row" data-open="cash">
           <div class="summary-main">
             <div class="summary-title">キャッシュゲーム</div>
-            <div class="summary-sub">Cash Game</div>
           </div>
           <div class="summary-count num" id="count-cash">0件</div>
           <div class="chev">›</div>
