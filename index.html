@@ -886,12 +886,13 @@
     records.push(rec);
     if(event) addCustomOption('domEvent', event);
     saveRecords(); refreshEventDatalists();
-    document.getElementById('form-domestic').reset();
-    document.getElementById('dom-date').value = todayStr();
-    document.getElementById('dom-placed-fields').hidden = true;
+    document.getElementById('dom-buyin').value = '';
     document.getElementById('dom-prize').value = 0;
-    rebuildSelect('dom-tournament','domTournament');
-    rebuildSelect('dom-location','domLocation');
+    document.getElementById('dom-drink').checked = false;
+    document.getElementById('dom-placed').checked = false;
+    document.getElementById('dom-placed-fields').hidden = true;
+    document.getElementById('dom-entries').value = '';
+    document.getElementById('dom-rank').value = '';
     renderAll();
   });
 
@@ -926,12 +927,12 @@
     records.push(rec);
     if(event) addCustomOption('ovsEvent', event);
     saveRecords(); refreshEventDatalists();
-    document.getElementById('form-overseas').reset();
-    document.getElementById('ovs-date').value = todayStr();
-    document.getElementById('ovs-placed-fields').hidden = true;
+    document.getElementById('ovs-buyin').value = '';
     document.getElementById('ovs-prize').value = 0;
-    rebuildSelect('ovs-tournament','ovsTournament');
-    rebuildSelect('ovs-location','ovsLocation');
+    document.getElementById('ovs-placed').checked = false;
+    document.getElementById('ovs-placed-fields').hidden = true;
+    document.getElementById('ovs-entries').value = '';
+    document.getElementById('ovs-rank').value = '';
     renderAll();
   });
 
@@ -957,10 +958,8 @@
     };
     records.push(rec);
     saveRecords();
-    document.getElementById('form-cash').reset();
-    document.getElementById('cash-date').value = todayStr();
+    document.getElementById('cash-buyin').value = '';
     document.getElementById('cash-payout').value = 0;
-    rebuildSelect('cash-casino','cashCasino');
     renderAll();
   });
 
@@ -1000,6 +999,9 @@
       var el = v==='list' ? document.getElementById('record-list-view') : document.getElementById('form-view-'+v);
       el.hidden = (v!==view);
     });
+    if(view==='list'){
+      ['dom-date','ovs-date','cash-date'].forEach(function(id){ document.getElementById(id).value = todayStr(); });
+    }
     var page = document.getElementById('page-record');
     page.scrollTop = 0;
   }
