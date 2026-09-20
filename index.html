@@ -1,0 +1,1122 @@
+<title>ポーカー収支帳</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap">
+<style>
+  :root{
+    --bg:#f6f1e3;
+    --surface:#fffdf6;
+    --surface-2:#efe6cd;
+    --surface-3:#e6d9b4;
+    --ink:#221f18;
+    --ink-soft:#726a56;
+    --ink-faint:#a89b7c;
+    --accent:#93672c;
+    --accent-strong:#7a5323;
+    --accent-ink:#fffaef;
+    --line:#ddd0a9;
+    --line-strong:#c8b585;
+    --win:#2f6f4e;
+    --win-bg:#e3efe1;
+    --loss:#a3402b;
+    --loss-bg:#f5e3db;
+    --focus:#5d7ea8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#141209;
+      --surface:#1c1810;
+      --surface-2:#241f15;
+      --surface-3:#2f2818;
+      --ink:#f1e9d4;
+      --ink-soft:#b4a888;
+      --ink-faint:#786c50;
+      --accent:#dcae5f;
+      --accent-strong:#ecc385;
+      --accent-ink:#241a08;
+      --line:#39301d;
+      --line-strong:#4c4025;
+      --win:#6cbb8d;
+      --win-bg:#1c2c21;
+      --loss:#e0896a;
+      --loss-bg:#3a2318;
+      --focus:#8fb2da;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#141209;
+    --surface:#1c1810;
+    --surface-2:#241f15;
+    --surface-3:#2f2818;
+    --ink:#f1e9d4;
+    --ink-soft:#b4a888;
+    --ink-faint:#786c50;
+    --accent:#dcae5f;
+    --accent-strong:#ecc385;
+    --accent-ink:#241a08;
+    --line:#39301d;
+    --line-strong:#4c4025;
+    --win:#6cbb8d;
+    --win-bg:#1c2c21;
+    --loss:#e0896a;
+    --loss-bg:#3a2318;
+    --focus:#8fb2da;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;overscroll-behavior:none;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New','Hiragino Sans','Yu Gothic',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .num{font-family:'Space Mono','SFMono-Regular',Consolas,monospace;font-variant-numeric:tabular-nums;}
+  h1,h2,h3{font-family:'Shippori Mincho','Hiragino Mincho ProN','Yu Mincho',serif;margin:0;text-wrap:balance;}
+  button{font-family:inherit;}
+  input,select{font-family:inherit;color:inherit;}
+
+  .app{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    max-width:560px;
+    margin:0 auto;
+    background:var(--bg);
+    overflow:hidden;
+  }
+
+  .topbar{
+    flex:none;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    padding:14px 18px 12px;
+    border-bottom:1px solid var(--line);
+    background:var(--surface);
+  }
+  .brand{display:flex;flex-direction:column;gap:2px;}
+  .brand h1{font-size:21px;font-weight:800;letter-spacing:.02em;}
+  .brand .masthead{
+    font-family:'Space Mono',monospace;
+    font-size:9px;
+    letter-spacing:.18em;
+    color:var(--ink-faint);
+    text-transform:uppercase;
+  }
+  .topbar .today{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+
+  .content{flex:1;min-height:0;position:relative;}
+  .page{
+    position:absolute;inset:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    padding:16px 16px calc(24px + env(safe-area-inset-bottom,0px));
+    display:flex;flex-direction:column;gap:16px;
+  }
+  .page[hidden]{display:none;}
+
+  .section-label{
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin:2px 2px 0;
+  }
+
+  /* ---- entry accordion cards ---- */
+  .entry-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .entry-card summary{
+    list-style:none;
+    cursor:pointer;
+    padding:14px 16px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .entry-card summary::-webkit-details-marker{display:none;}
+  .entry-card summary:focus-visible{outline:2px solid var(--focus);outline-offset:-2px;}
+  .summary-main{display:flex;flex-direction:column;gap:3px;min-width:0;}
+  .summary-title{font-weight:700;font-size:15px;}
+  .summary-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--ink-faint);letter-spacing:.1em;text-transform:uppercase;}
+  .summary-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-soft);flex:none;}
+  .chev{flex:none;font-size:20px;color:var(--ink-faint);transition:transform .18s ease;transform:rotate(0deg);}
+  details[open] .chev{transform:rotate(90deg);}
+  .entry-card form{
+    padding:2px 16px 16px;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+    display:flex;flex-direction:column;gap:12px;
+  }
+
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:12px;color:var(--ink-soft);font-weight:500;}
+  .field input[type=date],
+  .field input[type=text],
+  .field input[type=number],
+  .field select{
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:10px 11px;
+    font-size:15px;
+    color:var(--ink);
+    width:100%;
+  }
+  .field input:focus-visible,.field select:focus-visible{outline:2px solid var(--focus);outline-offset:1px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  .add-row{display:flex;gap:6px;margin-top:2px;}
+  .add-row input{flex:1;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:7px;padding:9px 10px;font-size:14px;color:var(--ink);}
+
+  .toggle-row{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:7px;
+    padding:10px 12px;
+  }
+  .toggle-row .toggle-text{display:flex;flex-direction:column;gap:2px;}
+  .toggle-row .toggle-text span.t{font-size:13.5px;font-weight:500;}
+  .toggle-row .toggle-text span.c{font-size:11px;color:var(--ink-faint);}
+  .switch{position:relative;width:40px;height:23px;flex:none;}
+  .switch input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer;}
+  .switch .track{position:absolute;inset:0;background:var(--line-strong);border-radius:20px;transition:background .15s;}
+  .switch .knob{position:absolute;top:2px;left:2px;width:19px;height:19px;background:var(--surface);border-radius:50%;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.25);}
+  .switch input:checked + .track{background:var(--accent);}
+  .switch input:checked + .track + .knob{transform:translateX(17px);}
+
+  .reveal-fields{display:flex;flex-direction:column;gap:10px;padding-top:2px;}
+
+  .btn{
+    border:none;border-radius:8px;padding:12px 16px;font-size:14.5px;font-weight:700;
+    cursor:pointer;letter-spacing:.02em;
+  }
+  .btn-primary{background:var(--accent);color:var(--accent-ink);}
+  .btn-primary:active{background:var(--accent-strong);}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line-strong);}
+
+  /* ---- ledger / stats ---- */
+  .ledger-head{display:flex;flex-direction:column;gap:8px;}
+  .ledger-head h2{font-size:17px;}
+  .pattern-switch{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:3px;gap:3px;}
+  .seg-btn{flex:1;border:none;background:transparent;border-radius:6px;padding:8px 4px;font-size:12.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;}
+  .seg-btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);}
+  .pattern-caption{font-size:11.5px;color:var(--ink-faint);padding:0 2px;line-height:1.5;}
+
+  .stat-table-wrap{overflow-x:auto;}
+  .stat-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:10px;table-layout:fixed;}
+  .stat-table th,.stat-table td{padding:8px 5px;}
+  .stat-table thead th{
+    text-align:right;padding-top:11px;padding-bottom:9px;border-bottom:1px solid var(--line-strong);
+    font-weight:400;
+  }
+  .stat-table thead th:first-child{width:26%;}
+  .stat-table thead .cat-name{display:block;font-size:12.5px;color:var(--ink);font-weight:700;}
+  .stat-table thead .cat-count{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--ink-faint);font-weight:400;margin-top:1px;}
+  .stat-table tbody th{text-align:left;font-weight:500;color:var(--ink-soft);font-size:11.5px;white-space:nowrap;}
+  .stat-table tbody td{text-align:right;font-family:'Space Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;font-weight:700;}
+  .stat-table tbody tr+tr th,.stat-table tbody tr+tr td{border-top:1px solid var(--line);}
+  .stat-table td.pos{color:var(--win);}
+  .stat-table td.neg{color:var(--loss);}
+  .v.pos{color:var(--win);}
+  .v.neg{color:var(--loss);}
+
+  .field.invalid input,.field.invalid select{border-color:var(--loss);}
+  .field.invalid label{color:var(--loss);}
+  .add-row.invalid-hint input{border-color:var(--loss);}
+  .form-error{background:var(--loss-bg);color:var(--loss);font-size:12px;font-weight:700;padding:9px 11px;border-radius:7px;}
+
+  /* ---- history page ---- */
+  .category-switch{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:3px;gap:3px;}
+
+  .month-label{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--ink-faint);padding:4px 2px 0;}
+
+  .series-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .series-card summary{list-style:none;cursor:pointer;padding:13px 15px;display:flex;justify-content:space-between;gap:10px;align-items:center;}
+  .series-card summary::-webkit-details-marker{display:none;}
+  .series-title{font-weight:700;font-size:14.5px;}
+  .series-sub{font-size:11.5px;color:var(--ink-faint);margin-top:2px;}
+  .series-net{font-size:13px;font-weight:700;flex:none;}
+  .series-events{border-top:1px solid var(--line);}
+  .event-row{padding:10px 15px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:4px;}
+  .event-row:first-child{border-top:none;}
+  .event-row .er-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline;}
+  .event-row .er-date{font-family:'Space Mono',monospace;font-size:11.5px;color:var(--ink-soft);}
+  .event-row .er-event{font-size:12.5px;color:var(--ink-soft);flex:1;}
+  .event-row .er-net{font-size:13.5px;font-weight:700;}
+  .event-row .er-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .chip{font-size:10.5px;padding:2px 7px;border-radius:20px;background:var(--surface-3);color:var(--ink-soft);}
+  .chip.placed{background:var(--win-bg);color:var(--win);font-weight:700;}
+  .er-actions{display:flex;justify-content:flex-end;}
+  .link-btn{background:none;border:none;color:var(--ink-faint);font-size:11px;padding:2px 4px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+
+  .flat-row{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 15px;display:flex;flex-direction:column;gap:6px;}
+  .flat-row .fr-top{display:flex;justify-content:space-between;align-items:baseline;}
+  .flat-row .fr-name{font-weight:700;font-size:14px;}
+  .flat-row .fr-date{font-family:'Space Mono',monospace;font-size:11px;color:var(--ink-soft);}
+  .flat-row .fr-nums{display:flex;justify-content:space-between;align-items:center;}
+  .flat-row .fr-detail{font-size:11.5px;color:var(--ink-faint);}
+
+  .top-results{display:flex;flex-direction:column;gap:8px;}
+  .top-row{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .top-row .tr-main{display:flex;flex-direction:column;gap:3px;min-width:0;}
+  .tr-title{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tr-sub{font-size:11px;color:var(--ink-faint);}
+  .tr-rank{flex:none;text-align:right;}
+  .tr-rank .rk{font-family:'Space Mono',monospace;font-weight:700;font-size:15px;color:var(--accent-strong);}
+  .tr-rank .pz{font-size:10.5px;color:var(--ink-soft);}
+
+  .empty-state{
+    border:1px dashed var(--line-strong);border-radius:10px;padding:26px 18px;
+    text-align:center;color:var(--ink-faint);font-size:12.5px;display:flex;flex-direction:column;gap:6px;align-items:center;
+  }
+  .empty-state svg{opacity:.5;}
+
+  /* ---- tab bar ---- */
+  .tabbar{
+    flex:none;display:flex;border-top:1px solid var(--line);background:var(--surface);
+    padding:6px 10px calc(6px + env(safe-area-inset-bottom,0px));
+  }
+  .tab-btn{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    background:none;border:none;padding:6px 4px;color:var(--ink-faint);cursor:pointer;
+  }
+  .tab-btn svg{width:21px;height:21px;}
+  .tab-btn span{font-size:10.5px;font-weight:700;letter-spacing:.02em;}
+  .tab-btn[aria-current="true"]{color:var(--accent-strong);}
+
+  ::selection{background:var(--accent);color:var(--accent-ink);}
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <h1>ポーカー収支帳</h1>
+      <div class="masthead">Personal Results Ledger</div>
+    </div>
+    <div class="today num" id="today-label"></div>
+  </header>
+
+  <main class="content">
+
+    <!-- ============ PAGE 1: 記録 ============ -->
+    <section class="page" id="page-record">
+
+      <div class="section-label">記録を追加</div>
+
+      <!-- 国内トナメ -->
+      <details class="entry-card" id="card-domestic">
+        <summary>
+          <div class="summary-main">
+            <div class="summary-title">国内トナメ</div>
+            <div class="summary-sub">Domestic Tournament</div>
+          </div>
+          <div class="summary-count num" id="count-domestic">0件</div>
+          <div class="chev">›</div>
+        </summary>
+        <form id="form-domestic" novalidate>
+          <div class="form-error" id="dom-form-error" hidden>入力に不備があります。赤枠の項目をご確認ください</div>
+          <div class="field">
+            <label for="dom-date">日付</label>
+            <input type="date" id="dom-date">
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="dom-tournament">大会名</label>
+              <select id="dom-tournament"></select>
+              <div class="add-row" id="dom-tournament-add" hidden>
+                <input type="text" id="dom-tournament-add-input" placeholder="新しい大会名">
+                <button type="button" class="btn btn-primary" data-add-confirm="dom-tournament">追加</button>
+                <button type="button" class="btn btn-ghost" data-add-cancel="dom-tournament">やめる</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="dom-location">開催地</label>
+              <select id="dom-location"></select>
+              <div class="add-row" id="dom-location-add" hidden>
+                <input type="text" id="dom-location-add-input" placeholder="新しい開催地">
+                <button type="button" class="btn btn-primary" data-add-confirm="dom-location">追加</button>
+                <button type="button" class="btn btn-ghost" data-add-cancel="dom-location">やめる</button>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="dom-event">イベント名（任意）</label>
+            <input type="text" id="dom-event" list="dom-event-list" placeholder="例）Main Event Day1">
+            <datalist id="dom-event-list"></datalist>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="dom-buyin">バイイン額（円）</label>
+              <input type="number" id="dom-buyin" inputmode="numeric" min="0" step="1">
+            </div>
+            <div class="field">
+              <label for="dom-prize">賞金額（円）</label>
+              <input type="number" id="dom-prize" inputmode="numeric" min="0" step="1" value="0">
+            </div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-text">
+              <span class="t">ドリンクチケット</span>
+              <span class="c">有りの場合 +¥1,000（パターン3のみバイインに算入）</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="dom-drink">
+              <span class="track"></span>
+              <span class="knob"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-text">
+              <span class="t">上位入賞を記録</span>
+              <span class="c">総エントリー数と順位を残す</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="dom-placed">
+              <span class="track"></span>
+              <span class="knob"></span>
+            </label>
+          </div>
+          <div class="reveal-fields" id="dom-placed-fields" hidden>
+            <div class="grid-2">
+              <div class="field">
+                <label for="dom-entries">総エントリー数</label>
+                <input type="number" id="dom-entries" inputmode="numeric" min="1" step="1">
+              </div>
+              <div class="field">
+                <label for="dom-rank">順位</label>
+                <input type="number" id="dom-rank" inputmode="numeric" min="1" step="1">
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">国内トナメを記録する</button>
+        </form>
+      </details>
+
+      <!-- 海外トナメ -->
+      <details class="entry-card" id="card-overseas">
+        <summary>
+          <div class="summary-main">
+            <div class="summary-title">海外トナメ</div>
+            <div class="summary-sub">Overseas Tournament</div>
+          </div>
+          <div class="summary-count num" id="count-overseas">0件</div>
+          <div class="chev">›</div>
+        </summary>
+        <form id="form-overseas" novalidate>
+          <div class="form-error" id="ovs-form-error" hidden>入力に不備があります。赤枠の項目をご確認ください</div>
+          <div class="field">
+            <label for="ovs-date">日付</label>
+            <input type="date" id="ovs-date">
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="ovs-tournament">大会名</label>
+              <select id="ovs-tournament"></select>
+              <div class="add-row" id="ovs-tournament-add" hidden>
+                <input type="text" id="ovs-tournament-add-input" placeholder="大会名を入力">
+                <button type="button" class="btn btn-primary" data-add-confirm="ovs-tournament">追加</button>
+                <button type="button" class="btn btn-ghost" data-add-cancel="ovs-tournament">やめる</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="ovs-location">開催地</label>
+              <select id="ovs-location"></select>
+              <div class="add-row" id="ovs-location-add" hidden>
+                <input type="text" id="ovs-location-add-input" placeholder="新しい開催地">
+                <button type="button" class="btn btn-primary" data-add-confirm="ovs-location">追加</button>
+                <button type="button" class="btn btn-ghost" data-add-cancel="ovs-location">やめる</button>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="ovs-event">イベント名（任意）</label>
+            <input type="text" id="ovs-event" list="ovs-event-list" placeholder="例）Main Event Day1">
+            <datalist id="ovs-event-list"></datalist>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="ovs-buyin">バイイン額（円）</label>
+              <input type="number" id="ovs-buyin" inputmode="numeric" min="0" step="1">
+            </div>
+            <div class="field">
+              <label for="ovs-prize">賞金額（円）</label>
+              <input type="number" id="ovs-prize" inputmode="numeric" min="0" step="1" value="0">
+            </div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-text">
+              <span class="t">上位入賞を記録</span>
+              <span class="c">総エントリー数と順位を残す</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="ovs-placed">
+              <span class="track"></span>
+              <span class="knob"></span>
+            </label>
+          </div>
+          <div class="reveal-fields" id="ovs-placed-fields" hidden>
+            <div class="grid-2">
+              <div class="field">
+                <label for="ovs-entries">総エントリー数</label>
+                <input type="number" id="ovs-entries" inputmode="numeric" min="1" step="1">
+              </div>
+              <div class="field">
+                <label for="ovs-rank">順位</label>
+                <input type="number" id="ovs-rank" inputmode="numeric" min="1" step="1">
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">海外トナメを記録する</button>
+        </form>
+      </details>
+
+      <!-- キャッシュゲーム -->
+      <details class="entry-card" id="card-cash">
+        <summary>
+          <div class="summary-main">
+            <div class="summary-title">キャッシュゲーム</div>
+            <div class="summary-sub">Cash Game</div>
+          </div>
+          <div class="summary-count num" id="count-cash">0件</div>
+          <div class="chev">›</div>
+        </summary>
+        <form id="form-cash" novalidate>
+          <div class="form-error" id="cash-form-error" hidden>入力に不備があります。赤枠の項目をご確認ください</div>
+          <div class="field">
+            <label for="cash-date">日付</label>
+            <input type="date" id="cash-date">
+          </div>
+          <div class="field">
+            <label for="cash-casino">カジノ名</label>
+            <select id="cash-casino"></select>
+            <div class="add-row" id="cash-casino-add" hidden>
+              <input type="text" id="cash-casino-add-input" placeholder="カジノ名を入力">
+              <button type="button" class="btn btn-primary" data-add-confirm="cash-casino">追加</button>
+              <button type="button" class="btn btn-ghost" data-add-cancel="cash-casino">やめる</button>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="cash-buyin">バイイン額（円）</label>
+              <input type="number" id="cash-buyin" inputmode="numeric" min="0" step="1">
+            </div>
+            <div class="field">
+              <label for="cash-payout">最終払戻額（円）</label>
+              <input type="number" id="cash-payout" inputmode="numeric" min="0" step="1" value="0">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">キャッシュを記録する</button>
+        </form>
+      </details>
+
+      <div class="ledger-head">
+        <div class="section-label">収支サマリー</div>
+        <h2>Summary</h2>
+        <div class="pattern-switch" role="group" aria-label="集計パターン">
+          <button type="button" class="seg-btn" data-pattern="1">税抜</button>
+          <button type="button" class="seg-btn" data-pattern="2">チケット抜き</button>
+          <button type="button" class="seg-btn" data-pattern="3">チケット込み</button>
+        </div>
+        <div class="pattern-caption" id="pattern-caption"></div>
+      </div>
+
+      <div class="stat-table-wrap"><table class="stat-table" id="stat-table"></table></div>
+
+    </section>
+
+    <!-- ============ PAGE 2: 履歴 ============ -->
+    <section class="page" id="page-history" hidden>
+
+      <div class="section-label">履歴</div>
+      <div class="category-switch" role="group" aria-label="カテゴリ切り替え">
+        <button type="button" class="seg-btn" data-hcat="domestic">国内</button>
+        <button type="button" class="seg-btn" data-hcat="overseas">海外</button>
+        <button type="button" class="seg-btn" data-hcat="cash">キャッシュ</button>
+      </div>
+
+      <div id="history-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+      <div class="section-label" style="margin-top:6px;">上位成績</div>
+      <div class="top-results" id="top-results-list"></div>
+
+    </section>
+
+  </main>
+
+  <nav class="tabbar">
+    <button type="button" class="tab-btn" data-page="record" aria-current="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"></rect><line x1="8" y1="8" x2="16" y2="8"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="8" y1="16" x2="12" y2="16"></line></svg>
+      <span>記録</span>
+    </button>
+    <button type="button" class="tab-btn" data-page="history" aria-current="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5l3.2 2"></path></svg>
+      <span>履歴</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var KEYS = { records:'pokerlog.records.v1', options:'pokerlog.options.v1', pattern:'pokerlog.pattern.v1', hcat:'pokerlog.hcat.v1' };
+
+  var DEFAULTS = {
+    domTournament: ['JOPT','SPADIE','FST','Nippon Series','U-30'],
+    domLocation: ['Tokyo','Osaka','Fukuoka','Sapporo'],
+    ovsTournament: [],
+    ovsLocation: ['Incheon','Jeju','Manila'],
+    cashCasino: [],
+    domEvent: [],
+    ovsEvent: []
+  };
+
+  function safeGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+  function safeSet(key,val){ try{ localStorage.setItem(key,val); }catch(e){} }
+
+  function loadJSON(key, fallback){
+    var raw = safeGet(key);
+    if(!raw) return fallback;
+    try{ return JSON.parse(raw); }catch(e){ return fallback; }
+  }
+
+  var records = loadJSON(KEYS.records, []);
+  var customOptions = loadJSON(KEYS.options, {});
+  var pattern = parseInt(safeGet(KEYS.pattern) || '1', 10);
+  var historyCat = safeGet(KEYS.hcat) || 'domestic';
+
+  function saveRecords(){ safeSet(KEYS.records, JSON.stringify(records)); }
+  function saveOptions(){ safeSet(KEYS.options, JSON.stringify(customOptions)); }
+  function savePattern(){ safeSet(KEYS.pattern, String(pattern)); }
+  function saveHcat(){ safeSet(KEYS.hcat, historyCat); }
+
+  function optionList(key){
+    var base = DEFAULTS[key].slice();
+    var custom = customOptions[key] || [];
+    custom.forEach(function(v){ if(base.indexOf(v)===-1) base.push(v); });
+    return base;
+  }
+  function addCustomOption(key, value){
+    value = value.trim();
+    if(!value) return false;
+    if(!customOptions[key]) customOptions[key] = [];
+    if(optionList(key).indexOf(value) !== -1) return false;
+    customOptions[key].push(value);
+    saveOptions();
+    return true;
+  }
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+  function yen(n){ return '¥' + Math.round(n).toLocaleString('ja-JP'); }
+  function pct(n){ return n.toFixed(1) + '%'; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+  /* ---------- calculation ---------- */
+  function domesticBuyin(r){
+    if(pattern===1) return Math.floor(r.buyin/1.1);
+    if(pattern===3) return r.buyin + (r.drinkTicket?1000:0);
+    return r.buyin;
+  }
+  function computedBuyin(r){ return r.category==='domestic' ? domesticBuyin(r) : r.buyin; }
+  function computedReturn(r){ return r.category==='cash' ? r.payout : r.prize; }
+  function computedNet(r){ return computedReturn(r) - computedBuyin(r); }
+
+  function categoryStats(cat){
+    var recs = records.filter(function(r){ return r.category===cat; });
+    var totalBuyin=0, totalReturn=0, wins=0;
+    recs.forEach(function(r){
+      var b=computedBuyin(r), p=computedReturn(r);
+      totalBuyin+=b; totalReturn+=p;
+      if((p-b)>0) wins++;
+    });
+    var rate = recs.length ? (wins/recs.length*100) : 0;
+    return { count:recs.length, totalBuyin:totalBuyin, totalReturn:totalReturn, net:totalReturn-totalBuyin, rate:rate };
+  }
+
+  /* ---------- rendering: forms / options ---------- */
+  var SELECT_FIELDS = [
+    {id:'dom-tournament', key:'domTournament'},
+    {id:'dom-location', key:'domLocation'},
+    {id:'ovs-tournament', key:'ovsTournament'},
+    {id:'ovs-location', key:'ovsLocation'},
+    {id:'cash-casino', key:'cashCasino'}
+  ];
+
+  function rebuildSelect(fieldId, key, keepValue){
+    var sel = document.getElementById(fieldId);
+    var prev = keepValue !== undefined ? keepValue : sel.value;
+    sel.innerHTML = '';
+    var list = optionList(key);
+    if(list.length===0){
+      var ph = document.createElement('option');
+      ph.value=''; ph.textContent='選択してください'; ph.disabled=true; ph.selected=true;
+      sel.appendChild(ph);
+    }
+    list.forEach(function(v){
+      var o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o);
+    });
+    var addOpt = document.createElement('option');
+    addOpt.value='__add__'; addOpt.textContent='＋ 新しい項目を追加';
+    sel.appendChild(addOpt);
+    if(list.indexOf(prev)!==-1) sel.value = prev;
+  }
+
+  function refreshComboVisibility(fieldId, key){
+    var sel = document.getElementById(fieldId);
+    var addRow = document.getElementById(fieldId+'-add');
+    var cancelBtn = addRow.querySelector('[data-add-cancel]');
+    if(optionList(key).length===0){
+      sel.hidden = true;
+      addRow.hidden = false;
+      cancelBtn.hidden = true;
+    } else {
+      sel.hidden = false;
+      cancelBtn.hidden = false;
+    }
+  }
+
+  function comboValue(fieldId){
+    var sel = document.getElementById(fieldId);
+    if(sel.hidden) return '';
+    var v = sel.value;
+    return (v && v!=='__add__') ? v : '';
+  }
+
+  function markComboInvalid(fieldId, invalid){
+    var sel = document.getElementById(fieldId);
+    var addRow = document.getElementById(fieldId+'-add');
+    if(sel.hidden){
+      addRow.classList.toggle('invalid-hint', invalid);
+      var f = sel.closest('.field');
+      if(f) f.classList.remove('invalid');
+    } else {
+      addRow.classList.remove('invalid-hint');
+      var field = sel.closest('.field');
+      if(field) field.classList.toggle('invalid', invalid);
+    }
+  }
+
+  function setFieldInvalid(el, invalid){
+    var field = el.closest('.field');
+    if(field) field.classList.toggle('invalid', invalid);
+  }
+
+  function initSelectAdd(fieldId, key){
+    var sel = document.getElementById(fieldId);
+    var addRow = document.getElementById(fieldId+'-add');
+    var addInput = document.getElementById(fieldId+'-add-input');
+    var lastValue = '';
+    sel.addEventListener('focus', function(){ lastValue = sel.value; });
+    sel.addEventListener('change', function(){
+      if(sel.value==='__add__'){
+        addRow.hidden = false;
+        addInput.value='';
+        addInput.focus();
+      } else {
+        lastValue = sel.value;
+      }
+    });
+    addRow.querySelector('[data-add-confirm]').addEventListener('click', function(){
+      var v = addInput.value.trim();
+      if(!v){ addInput.focus(); return; }
+      addCustomOption(key, v);
+      rebuildSelect(fieldId, key, v);
+      refreshComboVisibility(fieldId, key);
+      addRow.hidden = true;
+      addRow.classList.remove('invalid-hint');
+      lastValue = v;
+    });
+    addRow.querySelector('[data-add-cancel]').addEventListener('click', function(){
+      sel.value = lastValue;
+      addRow.hidden = true;
+    });
+  }
+
+  SELECT_FIELDS.forEach(function(f){
+    rebuildSelect(f.id, f.key);
+    initSelectAdd(f.id, f.key);
+    refreshComboVisibility(f.id, f.key);
+  });
+
+  function refreshEventDatalist(id, key){
+    var dl = document.getElementById(id);
+    dl.innerHTML = '';
+    optionList(key).forEach(function(v){
+      var o=document.createElement('option'); o.value=v; dl.appendChild(o);
+    });
+  }
+  function refreshEventDatalists(){
+    refreshEventDatalist('dom-event-list','domEvent');
+    refreshEventDatalist('ovs-event-list','ovsEvent');
+  }
+  refreshEventDatalists();
+
+  ['form-domestic','form-overseas','form-cash'].forEach(function(fid){
+    var form = document.getElementById(fid);
+    ['input','change'].forEach(function(evt){
+      form.addEventListener(evt, function(e){
+        var field = e.target.closest('.field');
+        if(field) field.classList.remove('invalid');
+        var addRow = e.target.closest('.add-row');
+        if(addRow) addRow.classList.remove('invalid-hint');
+      });
+    });
+  });
+
+  /* placed-field reveal */
+  function wireReveal(toggleId, panelId){
+    var t=document.getElementById(toggleId), p=document.getElementById(panelId);
+    t.addEventListener('change', function(){ p.hidden = !t.checked; });
+  }
+  wireReveal('dom-placed','dom-placed-fields');
+  wireReveal('ovs-placed','ovs-placed-fields');
+
+  /* today defaults */
+  function todayStr(){
+    var d = new Date();
+    var m = String(d.getMonth()+1).padStart(2,'0');
+    var day = String(d.getDate()).padStart(2,'0');
+    return d.getFullYear()+'-'+m+'-'+day;
+  }
+  ['dom-date','ovs-date','cash-date'].forEach(function(id){ document.getElementById(id).value = todayStr(); });
+
+  var WEEKDAYS = ['日','月','火','水','木','金','土'];
+  (function(){
+    var d = new Date();
+    document.getElementById('today-label').textContent =
+      d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+' ('+WEEKDAYS[d.getDay()]+')';
+  })();
+
+  /* ---------- form submit handlers ---------- */
+  document.getElementById('form-domestic').addEventListener('submit', function(e){
+    e.preventDefault();
+    var dateEl = document.getElementById('dom-date');
+    var buyinEl = document.getElementById('dom-buyin');
+    var tournament = comboValue('dom-tournament');
+    var location = comboValue('dom-location');
+    var dateOk = !!dateEl.value;
+    var buyinOk = buyinEl.value !== '' && Number(buyinEl.value) >= 0;
+    setFieldInvalid(dateEl, !dateOk);
+    setFieldInvalid(buyinEl, !buyinOk);
+    markComboInvalid('dom-tournament', !tournament);
+    markComboInvalid('dom-location', !location);
+    var errEl = document.getElementById('dom-form-error');
+    if(!dateOk || !buyinOk || !tournament || !location){ errEl.hidden = false; return; }
+    errEl.hidden = true;
+    var event = document.getElementById('dom-event').value.trim();
+    var placed = document.getElementById('dom-placed').checked;
+    var rec = {
+      id: uid(), category:'domestic',
+      date: document.getElementById('dom-date').value,
+      tournamentName: tournament, location: location, eventName: event,
+      buyin: Number(document.getElementById('dom-buyin').value)||0,
+      prize: Number(document.getElementById('dom-prize').value)||0,
+      drinkTicket: document.getElementById('dom-drink').checked,
+      placed: placed,
+      totalEntries: placed ? (Number(document.getElementById('dom-entries').value)||null) : null,
+      rank: placed ? (Number(document.getElementById('dom-rank').value)||null) : null
+    };
+    records.push(rec);
+    if(event) addCustomOption('domEvent', event);
+    saveRecords(); refreshEventDatalists();
+    document.getElementById('form-domestic').reset();
+    document.getElementById('dom-date').value = todayStr();
+    document.getElementById('dom-placed-fields').hidden = true;
+    document.getElementById('dom-prize').value = 0;
+    rebuildSelect('dom-tournament','domTournament');
+    rebuildSelect('dom-location','domLocation');
+    renderAll();
+  });
+
+  document.getElementById('form-overseas').addEventListener('submit', function(e){
+    e.preventDefault();
+    var dateEl = document.getElementById('ovs-date');
+    var buyinEl = document.getElementById('ovs-buyin');
+    var tournament = comboValue('ovs-tournament');
+    var location = comboValue('ovs-location');
+    var dateOk = !!dateEl.value;
+    var buyinOk = buyinEl.value !== '' && Number(buyinEl.value) >= 0;
+    setFieldInvalid(dateEl, !dateOk);
+    setFieldInvalid(buyinEl, !buyinOk);
+    markComboInvalid('ovs-tournament', !tournament);
+    markComboInvalid('ovs-location', !location);
+    var errEl = document.getElementById('ovs-form-error');
+    if(!dateOk || !buyinOk || !tournament || !location){ errEl.hidden = false; return; }
+    errEl.hidden = true;
+    var event = document.getElementById('ovs-event').value.trim();
+    var placed = document.getElementById('ovs-placed').checked;
+    var rec = {
+      id: uid(), category:'overseas',
+      date: document.getElementById('ovs-date').value,
+      tournamentName: tournament, location: location, eventName: event,
+      buyin: Number(document.getElementById('ovs-buyin').value)||0,
+      prize: Number(document.getElementById('ovs-prize').value)||0,
+      drinkTicket:false,
+      placed: placed,
+      totalEntries: placed ? (Number(document.getElementById('ovs-entries').value)||null) : null,
+      rank: placed ? (Number(document.getElementById('ovs-rank').value)||null) : null
+    };
+    records.push(rec);
+    if(event) addCustomOption('ovsEvent', event);
+    saveRecords(); refreshEventDatalists();
+    document.getElementById('form-overseas').reset();
+    document.getElementById('ovs-date').value = todayStr();
+    document.getElementById('ovs-placed-fields').hidden = true;
+    document.getElementById('ovs-prize').value = 0;
+    rebuildSelect('ovs-tournament','ovsTournament');
+    rebuildSelect('ovs-location','ovsLocation');
+    renderAll();
+  });
+
+  document.getElementById('form-cash').addEventListener('submit', function(e){
+    e.preventDefault();
+    var dateEl = document.getElementById('cash-date');
+    var buyinEl = document.getElementById('cash-buyin');
+    var casino = comboValue('cash-casino');
+    var dateOk = !!dateEl.value;
+    var buyinOk = buyinEl.value !== '' && Number(buyinEl.value) >= 0;
+    setFieldInvalid(dateEl, !dateOk);
+    setFieldInvalid(buyinEl, !buyinOk);
+    markComboInvalid('cash-casino', !casino);
+    var errEl = document.getElementById('cash-form-error');
+    if(!dateOk || !buyinOk || !casino){ errEl.hidden = false; return; }
+    errEl.hidden = true;
+    var rec = {
+      id: uid(), category:'cash',
+      date: document.getElementById('cash-date').value,
+      casino: casino,
+      buyin: Number(document.getElementById('cash-buyin').value)||0,
+      payout: Number(document.getElementById('cash-payout').value)||0
+    };
+    records.push(rec);
+    saveRecords();
+    document.getElementById('form-cash').reset();
+    document.getElementById('cash-date').value = todayStr();
+    document.getElementById('cash-payout').value = 0;
+    rebuildSelect('cash-casino','cashCasino');
+    renderAll();
+  });
+
+  /* ---------- pattern switch ---------- */
+  var PATTERN_CAPTIONS = {
+    1: '国内トナメのエントリー費から消費税10%を除いた額をバイインとして集計（ドリンクチケット代は含みません）',
+    2: '国内トナメのエントリー費を入力どおりに集計（ドリンクチケット代は含みません）',
+    3: '国内トナメのエントリー費にドリンクチケット代（有りの場合+¥1,000）を加えて集計'
+  };
+  function setPattern(p){
+    pattern = p; savePattern();
+    document.querySelectorAll('.pattern-switch .seg-btn').forEach(function(b){
+      b.setAttribute('aria-pressed', String(Number(b.dataset.pattern)===p));
+    });
+    document.getElementById('pattern-caption').textContent = PATTERN_CAPTIONS[p];
+    renderStats();
+  }
+  document.querySelectorAll('.pattern-switch .seg-btn').forEach(function(b){
+    b.addEventListener('click', function(){ setPattern(Number(b.dataset.pattern)); });
+  });
+
+  /* ---------- history category switch ---------- */
+  function setHistoryCat(cat){
+    historyCat = cat; saveHcat();
+    document.querySelectorAll('.category-switch .seg-btn').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.dataset.hcat===cat));
+    });
+    renderHistoryList();
+  }
+  document.querySelectorAll('.category-switch .seg-btn').forEach(function(b){
+    b.addEventListener('click', function(){ setHistoryCat(b.dataset.hcat); });
+  });
+
+  /* ---------- tab bar ---------- */
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.tab-btn').forEach(function(x){ x.setAttribute('aria-current', String(x===b)); });
+      document.getElementById('page-record').hidden = b.dataset.page!=='record';
+      document.getElementById('page-history').hidden = b.dataset.page!=='history';
+    });
+  });
+
+  /* ---------- delete ---------- */
+  function deleteRecord(id){
+    if(!confirm('この記録を削除しますか？')) return;
+    records = records.filter(function(r){ return r.id!==id; });
+    saveRecords();
+    renderAll();
+  }
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-delete]');
+    if(btn){ deleteRecord(btn.getAttribute('data-delete')); }
+  });
+
+  /* ---------- render: stats ---------- */
+  var CAT_LABEL = { domestic:['国内トナメ','Domestic'], overseas:['海外トナメ','Overseas'], cash:['キャッシュ','Cash Game'] };
+
+  function renderStats(){
+    var cats = ['domestic','overseas','cash'];
+    var stats = cats.map(categoryStats);
+
+    var headCells = cats.map(function(cat,i){
+      return '<th><span class="cat-name">'+CAT_LABEL[cat][0]+'</span><span class="cat-count num">'+stats[i].count+'件</span></th>';
+    }).join('');
+
+    function row(label, cells){
+      return '<tr><th scope="row">'+label+'</th>'+cells.join('')+'</tr>';
+    }
+    var buyinRow = row('バイイン', stats.map(function(s){ return '<td>'+yen(s.totalBuyin)+'</td>'; }));
+    var prizeRow = row('プライズ', stats.map(function(s){ return '<td>'+yen(s.totalReturn)+'</td>'; }));
+    var netRow = row('収支', stats.map(function(s){
+      var c = s.net>0?'pos':(s.net<0?'neg':'');
+      return '<td class="'+c+'">'+(s.net>0?'+':'')+yen(s.net)+'</td>';
+    }));
+    var rateRow = row('勝率', stats.map(function(s){ return '<td>'+(s.count? pct(s.rate) : '—')+'</td>'; }));
+
+    document.getElementById('stat-table').innerHTML =
+      '<thead><tr><th></th>'+headCells+'</tr></thead>'+
+      '<tbody>'+buyinRow+prizeRow+netRow+rateRow+'</tbody>';
+
+    document.getElementById('count-domestic').textContent = stats[0].count + '件';
+    document.getElementById('count-overseas').textContent = stats[1].count + '件';
+    document.getElementById('count-cash').textContent = stats[2].count + '件';
+  }
+
+  /* ---------- render: history ---------- */
+  function fmtDate(d){
+    var p = d.split('-');
+    return p[0]+'.'+p[1]+'.'+p[2];
+  }
+  function fmtRange(d1,d2){
+    return d1===d2 ? fmtDate(d1) : fmtDate(d1)+' – '+fmtDate(d2);
+  }
+
+  function buildSeries(recs){
+    var byKey = {};
+    recs.forEach(function(r){
+      var k = r.tournamentName+'|'+r.location;
+      (byKey[k] = byKey[k]||[]).push(r);
+    });
+    var seriesList = [];
+    Object.keys(byKey).forEach(function(k){
+      var group = byKey[k].slice().sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:0; });
+      var current = [group[0]];
+      for(var i=1;i<group.length;i++){
+        var prevDate = new Date(current[current.length-1].date);
+        var curDate = new Date(group[i].date);
+        var diffDays = (curDate-prevDate)/86400000;
+        if(diffDays<=14){ current.push(group[i]); }
+        else { seriesList.push(current); current=[group[i]]; }
+      }
+      seriesList.push(current);
+    });
+    seriesList.sort(function(a,b){
+      var da=a[a.length-1].date, db=b[b.length-1].date;
+      return da<db?1:da>db?-1:0;
+    });
+    return seriesList;
+  }
+
+  function emptyState(msg){
+    return '<div class="empty-state"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="3"></rect><path d="M8 12h8M12 8v8"></path></svg><div>'+msg+'</div></div>';
+  }
+
+  function eventRowHTML(r){
+    var b = computedBuyin(r), p = computedReturn(r), n = p-b;
+    var netClass = n>0?'pos':(n<0?'neg':'');
+    var meta = '';
+    if(r.category==='domestic' && r.drinkTicket) meta += '<span class="chip">ドリンク有</span>';
+    if(r.placed && r.rank) meta += '<span class="chip placed">'+r.rank+'位'+(r.totalEntries?(' / '+r.totalEntries+'名'):'')+'</span>';
+    return '<div class="event-row">'+
+      '<div class="er-top"><span class="er-date num">'+fmtDate(r.date)+'</span><span class="er-event">'+esc(r.eventName||'—')+'</span><span class="er-net num '+netClass+'">'+(n>0?'+':'')+yen(n)+'</span></div>'+
+      '<div class="er-meta">'+meta+'<span class="chip">バイイン '+yen(b)+'</span><span class="chip">プライズ '+yen(p)+'</span></div>'+
+      '<div class="er-actions"><button type="button" class="link-btn" data-delete="'+r.id+'">削除</button></div>'+
+      '</div>';
+  }
+
+  function renderTournamentHistory(cat){
+    var list = document.getElementById('history-list');
+    var recs = records.filter(function(r){ return r.category===cat; });
+    if(recs.length===0){ list.innerHTML = emptyState('まだ'+CAT_LABEL[cat][0]+'の記録がありません'); return; }
+    var series = buildSeries(recs);
+    var html = '';
+    series.forEach(function(group){
+      var dates = group.map(function(r){return r.date;}).sort();
+      var totalBuyin=0, totalReturn=0;
+      group.forEach(function(r){ totalBuyin+=computedBuyin(r); totalReturn+=computedReturn(r); });
+      var net = totalReturn-totalBuyin;
+      var netClass = net>0?'pos':(net<0?'neg':'');
+      var sorted = group.slice().sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:0; });
+      html += '<details class="series-card">'+
+        '<summary><div><div class="series-title">'+esc(group[0].tournamentName)+' '+esc(group[0].location)+'</div>'+
+        '<div class="series-sub">'+fmtRange(dates[0],dates[dates.length-1])+' ・ '+group.length+'件</div></div>'+
+        '<div class="series-net num '+netClass+'">'+(net>0?'+':'')+yen(net)+'</div></summary>'+
+        '<div class="series-events">'+ sorted.map(eventRowHTML).join('') +'</div>'+
+        '</details>';
+    });
+    list.innerHTML = html;
+  }
+
+  function renderCashHistory(){
+    var list = document.getElementById('history-list');
+    var recs = records.filter(function(r){ return r.category==='cash'; }).slice().sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:0; });
+    if(recs.length===0){ list.innerHTML = emptyState('まだキャッシュゲームの記録がありません'); return; }
+    var html = '';
+    var lastMonth = '';
+    recs.forEach(function(r){
+      var month = r.date.slice(0,7);
+      if(month!==lastMonth){
+        var p = month.split('-');
+        html += '<div class="month-label">'+p[0]+'年'+p[1]+'月</div>';
+        lastMonth = month;
+      }
+      var net = r.payout - r.buyin;
+      var netClass = net>0?'pos':(net<0?'neg':'');
+      html += '<div class="flat-row">'+
+        '<div class="fr-top"><div class="fr-name">'+esc(r.casino)+'</div><div class="fr-date num">'+fmtDate(r.date)+'</div></div>'+
+        '<div class="fr-nums"><div class="fr-detail">バイイン '+yen(r.buyin)+' → 払戻 '+yen(r.payout)+'</div><div class="v num '+netClass+'">'+(net>0?'+':'')+yen(net)+'</div></div>'+
+        '<div class="er-actions"><button type="button" class="link-btn" data-delete="'+r.id+'">削除</button></div>'+
+        '</div>';
+    });
+    list.innerHTML = html;
+  }
+
+  function renderHistoryList(){
+    if(historyCat==='cash') renderCashHistory();
+    else renderTournamentHistory(historyCat);
+  }
+
+  function renderTopResults(){
+    var el = document.getElementById('top-results-list');
+    var recs = records.filter(function(r){ return r.category!=='cash' && r.placed && r.rank; })
+      .slice().sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:0; });
+    if(recs.length===0){ el.innerHTML = emptyState('上位入賞の記録はまだありません'); return; }
+    el.innerHTML = recs.map(function(r){
+      return '<div class="top-row">'+
+        '<div class="tr-main"><div class="tr-title">'+esc(r.tournamentName)+' '+esc(r.location)+(r.eventName?(' ・ '+esc(r.eventName)):'')+'</div>'+
+        '<div class="tr-sub">'+fmtDate(r.date)+' ・ '+(r.category==='domestic'?'国内':'海外')+(r.totalEntries?(' ・ '+r.totalEntries+'名中'):'')+'</div></div>'+
+        '<div class="tr-rank"><div class="rk num">'+r.rank+'位</div><div class="pz num">'+yen(r.prize)+'</div></div>'+
+        '</div>';
+    }).join('');
+  }
+
+  function renderAll(){
+    renderStats();
+    renderHistoryList();
+    renderTopResults();
+  }
+
+  setPattern(isNaN(pattern)||pattern<1||pattern>3 ? 1 : pattern);
+  document.querySelectorAll('.category-switch .seg-btn').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.dataset.hcat===historyCat));
+  });
+  renderAll();
+
+})();
+</script>
