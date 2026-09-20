@@ -696,14 +696,12 @@
 
   function categoryStats(cat){
     var recs = records.filter(function(r){ return r.category===cat; });
-    var totalBuyin=0, totalReturn=0, wins=0;
+    var totalBuyin=0, totalReturn=0;
     recs.forEach(function(r){
-      var b=computedBuyin(r), p=computedReturn(r);
-      totalBuyin+=b; totalReturn+=p;
-      if((p-b)>0) wins++;
+      totalBuyin+=computedBuyin(r); totalReturn+=computedReturn(r);
     });
-    var rate = recs.length ? (wins/recs.length*100) : 0;
-    return { count:recs.length, totalBuyin:totalBuyin, totalReturn:totalReturn, net:totalReturn-totalBuyin, rate:rate };
+    var returnRate = totalBuyin>0 ? (totalReturn/totalBuyin*100) : null;
+    return { count:recs.length, totalBuyin:totalBuyin, totalReturn:totalReturn, net:totalReturn-totalBuyin, returnRate:returnRate };
   }
 
   /* ---------- rendering: forms / options ---------- */
@@ -1058,7 +1056,11 @@
       var c = s.net>0?'pos':(s.net<0?'neg':'');
       return '<td class="'+c+'">'+(s.net>0?'+':'')+yen(s.net)+'</td>';
     }));
-    var rateRow = row('勝率', stats.map(function(s){ return '<td>'+(s.count? pct(s.rate) : '—')+'</td>'; }));
+    var rateRow = row('還元率', stats.map(function(s){
+      if(s.returnRate===null) return '<td>—</td>';
+      var c = s.returnRate>100?'pos':(s.returnRate<100?'neg':'');
+      return '<td class="'+c+'">'+pct(s.returnRate)+'</td>';
+    }));
 
     document.getElementById('stat-table').innerHTML =
       '<thead><tr><th></th>'+headCells+'</tr></thead>'+
